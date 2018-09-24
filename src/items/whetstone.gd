@@ -10,9 +10,9 @@ func effect():
 	if player.equipment.weapon != null and not player.equipment.weapon.is_sharpened():
 		player.equipment.weapon.sharpen(sharp)
 		player.animation_node.play("whetstone")
-		player.audio_node.play("whetstone")
+		player.audio(preload("res://data/sounds/whetstone.wav"))
 		return true
 	return false
 
 func clone():
-	return get_script().new(icon, name, quantity, player, sharp)
+	return get_script().new(name, icon, quantity, player, sharp)

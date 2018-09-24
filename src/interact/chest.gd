@@ -4,12 +4,16 @@ onready var inventory = preload("res://data/scenes/inventory.tscn").instance()
 onready var inventory_items = inventory.get_node("items")
 onready var hud = get_node("/root/game/hud")
 onready var animation = get_node("model/AnimationPlayer")
-onready var sound_node = get_node("sound")
 
 var player = null
 
 func _ready():
 	inventory.init([], 100)
+	set_process_input(false)
+
+func _notification(what):
+	if what == NOTIFICATION_PREDELETE:
+		inventory.free()
 
 func interact(player):
 	if self.player == null:
@@ -20,11 +24,12 @@ func open():
 	if animation.get_current_animation() == "open":
 		return
 	if animation.is_playing():
-		yield(animation, "finished")
-	sound_node.play("hinge")
+		yield(animation, "animation_finished")
+	$audio.play()
 	animation.play("open")
 	player.pause_player()
-	yield(animation, "finished")
+	get_viewport().get_camera().set_process_input(false)
+	yield(animation, "animation_finished")
 	hud.open_inventories([inventory, player.inventory])
 	hud.inventory.connect("popup_hide", self, "close")
 	set_process_input(true)
@@ -33,10 +38,11 @@ func close():
 	set_process_input(false)
 	hud.inventory.disconnect("popup_hide", self, "close")
 	hud.close_inventories()
-	sound_node.play("hinge")
+	$audio.play()
 	animation.play("close")
-	yield(animation, "finished")
+	yield(animation, "animation_finished")
 	player.resume_player()
+	get_viewport().get_camera().set_process_input(true)
 	player = null
 
 func _input(event):
